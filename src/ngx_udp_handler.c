@@ -10,14 +10,6 @@
 #include <ngx_udp.h>
 
 
-typedef struct {
-    ngx_rbtree_t          rbtree;
-    ngx_rbtree_node_t     sentinel;
-    ngx_queue_t           queue;
-    ngx_event_t          *ev;
-} ngx_udp_send_queue_t;
-
-
 static u_char *ngx_udp_log_error(ngx_log_t *log, u_char *buf, size_t len);
 
 

@@ -16,7 +16,7 @@ typedef struct {
 } ngx_udp_proxy_srv_conf_t;
 
 
-ngx_int_t ngx_udp_connect(ngx_udp_connection_t *uc);
+extern ngx_int_t ngx_udp_connect(ngx_udp_connection_t *uc);
 
 
 static void ngx_udp_proxy_read_response(ngx_event_t *rev);

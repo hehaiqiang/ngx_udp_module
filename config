@@ -1,7 +1,5 @@
 
-#
 # Copyright (C) Ngwsx
-#
 
 
 ngx_addon_name=ngx_udp_module
