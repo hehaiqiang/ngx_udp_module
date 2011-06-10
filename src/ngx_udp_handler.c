@@ -166,7 +166,7 @@ ngx_udp_send(ngx_connection_t *c, u_char *buf, size_t size)
 {
     ssize_t  n;
 
-    n = sendto(c->fd, buf, size, 0, c->sockaddr, c->socklen);
+    n = sendto(c->fd, (const char *) buf, size, 0, c->sockaddr, c->socklen);
 
     if (n == -1) {
         ngx_connection_error(c, ngx_socket_errno, "sendto() failed");
@@ -190,7 +190,9 @@ ngx_udp_internal_server_error(ngx_udp_session_t *s)
 
     cscf = ngx_udp_get_module_srv_conf(s, ngx_udp_core_module);
 
-    cscf->protocol->internal_server_error(s);
+    if (cscf->protocol->internal_server_error) {
+        cscf->protocol->internal_server_error(s);
+    }
 
     ngx_udp_close_connection(s->connection);
 }

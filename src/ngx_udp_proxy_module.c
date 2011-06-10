@@ -82,6 +82,7 @@ ngx_udp_proxy_init(ngx_udp_session_t *s, ngx_addr_t *peer)
     ngx_int_t                  rc;
     ngx_udp_proxy_t           *p;
     ngx_connection_t          *c;
+    ngx_udp_core_srv_conf_t   *cscf;
     ngx_udp_proxy_srv_conf_t  *pscf;
 
     c = s->connection;
@@ -109,7 +110,12 @@ ngx_udp_proxy_init(ngx_udp_session_t *s, ngx_addr_t *peer)
 
     c->log->action = "sending request to upstream";
 
-    p->uc.connection->read->handler = ngx_udp_proxy_read_response;
+    cscf = ngx_udp_get_module_srv_conf(s, ngx_udp_core_module);
+
+    if (cscf->protocol->process_proxy_response) {
+        p->uc.connection->read->handler = ngx_udp_proxy_read_response;
+    }
+
     p->uc.connection->data = s;
     p->uc.connection->pool = c->pool;
 
@@ -126,6 +132,11 @@ ngx_udp_proxy_init(ngx_udp_session_t *s, ngx_addr_t *peer)
 
     if (n == NGX_ERROR) {
         ngx_udp_proxy_internal_server_error(s);
+        return;
+    }
+
+    if (cscf->protocol->process_proxy_response == NULL) {
+        ngx_udp_proxy_close_session(s);
         return;
     }
 

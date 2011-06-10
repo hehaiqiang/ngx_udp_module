@@ -201,6 +201,12 @@ typedef struct {
 #define ngx_udp_conf_get_module_srv_conf(cf, module)                           \
     ((ngx_udp_conf_ctx_t *) cf->ctx)->srv_conf[module.ctx_index]
 
+#define ngx_udp_cycle_get_module_main_conf(cycle, module)                      \
+    (cycle->conf_ctx[ngx_udp_module.index] ?                                   \
+        ((ngx_udp_conf_ctx_t *) cycle->conf_ctx[ngx_udp_module.index])         \
+            ->main_conf[module.ctx_index]:                                     \
+        NULL)
+
 
 #if (NGX_UDP_SSL)
 void ngx_udp_starttls_handler(ngx_event_t *rev);
@@ -217,6 +223,7 @@ void ngx_udp_proxy_init(ngx_udp_session_t *s, ngx_addr_t *peer);
 
 
 extern ngx_uint_t    ngx_udp_max_module;
+extern ngx_module_t  ngx_udp_module;
 extern ngx_module_t  ngx_udp_core_module;
 
 
