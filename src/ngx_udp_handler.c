@@ -211,9 +211,13 @@ ngx_udp_close_connection(ngx_connection_t *c)
     s = c->data;
 
     if (s != NULL) {
+        c->log->action = "closing session";
+
         cscf = ngx_udp_get_module_srv_conf(s, ngx_udp_core_module);
 
-        cscf->protocol->close_session(s);
+        if (cscf->protocol->close_session) {
+            cscf->protocol->close_session(s);
+        }
     }
 
 #if (NGX_STAT_STUB)
