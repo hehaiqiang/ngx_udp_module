@@ -215,9 +215,13 @@ ngx_int_t ngx_udp_starttls_only(ngx_udp_session_t *s, ngx_connection_t *c);
 
 
 void ngx_udp_init_connection(ngx_connection_t *c);
-ssize_t ngx_udp_send(ngx_connection_t *c, u_char *buf, size_t size);
 void ngx_udp_close_connection(ngx_connection_t *c);
 void ngx_udp_internal_server_error(ngx_udp_session_t *s);
+
+ssize_t ngx_udp_sendto(ngx_connection_t *c, u_char *buf, size_t size,
+    struct sockaddr *sockaddr, socklen_t socklen);
+#define ngx_udp_send(c, buf, size)                                             \
+    ngx_udp_sendto(c, buf, size, c->sockaddr, c->socklen)
 
 void ngx_udp_proxy_init(ngx_udp_session_t *s, ngx_addr_t *peer);
 

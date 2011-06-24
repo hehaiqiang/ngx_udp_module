@@ -161,43 +161,6 @@ ngx_udp_init_connection(ngx_connection_t *c)
 }
 
 
-ssize_t
-ngx_udp_send(ngx_connection_t *c, u_char *buf, size_t size)
-{
-    ssize_t  n;
-
-    n = sendto(c->fd, (const char *) buf, size, 0, c->sockaddr, c->socklen);
-
-    if (n == -1) {
-        ngx_connection_error(c, ngx_socket_errno, "sendto() failed");
-        return NGX_ERROR;
-    }
-
-    if ((size_t) n != size) {
-        ngx_log_error(NGX_LOG_CRIT, c->log, 0,
-                      "sendto() incomplete n:%z size:uz", n, size);
-        return NGX_ERROR;
-    }
-
-    return n;
-}
-
-
-void
-ngx_udp_internal_server_error(ngx_udp_session_t *s)
-{
-    ngx_udp_core_srv_conf_t  *cscf;
-
-    cscf = ngx_udp_get_module_srv_conf(s, ngx_udp_core_module);
-
-    if (cscf->protocol->internal_server_error) {
-        cscf->protocol->internal_server_error(s);
-    }
-
-    ngx_udp_close_connection(s->connection);
-}
-
-
 void
 ngx_udp_close_connection(ngx_connection_t *c)
 {
@@ -296,6 +259,44 @@ ngx_udp_close_connection(ngx_connection_t *c)
     ngx_free_connection(c);
 
     ngx_destroy_pool(pool);
+}
+
+
+void
+ngx_udp_internal_server_error(ngx_udp_session_t *s)
+{
+    ngx_udp_core_srv_conf_t  *cscf;
+
+    cscf = ngx_udp_get_module_srv_conf(s, ngx_udp_core_module);
+
+    if (cscf->protocol->internal_server_error) {
+        cscf->protocol->internal_server_error(s);
+    }
+
+    ngx_udp_close_connection(s->connection);
+}
+
+
+ssize_t
+ngx_udp_sendto(ngx_connection_t *c, u_char *buf, size_t size,
+    struct sockaddr *sockaddr, socklen_t socklen)
+{
+    ssize_t  n;
+
+    n = sendto(c->fd, (const char *) buf, size, 0, sockaddr, socklen);
+
+    if (n == -1) {
+        ngx_connection_error(c, ngx_socket_errno, "sendto() failed");
+        return NGX_ERROR;
+    }
+
+    if ((size_t) n != size) {
+        ngx_log_error(NGX_LOG_CRIT, c->log, 0,
+                      "sendto() incomplete n:%z size:uz", n, size);
+        return NGX_ERROR;
+    }
+
+    return n;
 }
 
 
