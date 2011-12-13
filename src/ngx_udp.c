@@ -346,12 +346,19 @@ ngx_udp_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
             cscf = ngx_udp_get_module_srv_conf(addr[i].ctx,
                                                ngx_udp_core_module);
 
+#if (NGX_UDT)
+            ls = ngx_create_listening(cf, SOCK_DGRAM, addr[i].sockaddr,
+                                      addr[i].socklen);
+#else
             ls = ngx_create_listening(cf, addr[i].sockaddr, addr[i].socklen);
+#endif
             if (ls == NULL) {
                 return NGX_CONF_ERROR;
             }
 
+#if !(NGX_UDT)
             ls->type = SOCK_DGRAM;
+#endif
 
             ls->addr_ntop = 1;
             ls->handler = ngx_udp_init_connection;

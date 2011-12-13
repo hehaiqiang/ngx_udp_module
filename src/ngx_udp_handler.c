@@ -283,16 +283,29 @@ ngx_udp_sendto(ngx_connection_t *c, u_char *buf, size_t size,
 {
     ssize_t  n;
 
+#if (NGX_UDT)
+    n = ngx_sendto(c->fd, (const char *) buf, size, 0, sockaddr, socklen);
+#else
     n = sendto(c->fd, (const char *) buf, size, 0, sockaddr, socklen);
+#endif
 
     if (n == -1) {
+#if (NGX_UDT)
+        ngx_connection_error(c, ngx_socket_errno, "ngx_sendto() failed");
+#else
         ngx_connection_error(c, ngx_socket_errno, "sendto() failed");
+#endif
         return NGX_ERROR;
     }
 
     if ((size_t) n != size) {
+#if (NGX_UDT)
+        ngx_log_error(NGX_LOG_CRIT, c->log, 0,
+                      "ngx_sendto() incomplete n:%z size:uz", n, size);
+#else
         ngx_log_error(NGX_LOG_CRIT, c->log, 0,
                       "sendto() incomplete n:%z size:uz", n, size);
+#endif
         return NGX_ERROR;
     }
 
